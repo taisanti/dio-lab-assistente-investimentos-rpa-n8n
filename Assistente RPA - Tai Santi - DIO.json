@@ -1,0 +1,940 @@
+{
+  "name": "Assistente RPA",
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "json",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2640,
+        -112
+      ],
+      "id": "0bd7641d-b938-48c6-b9fa-f0b82fdbca22",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Clientes",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -400,
+        -384
+      ],
+      "id": "f72cbe5e-6005-41da-8e50-a6e11f43a26c",
+      "name": "Lista de clientes",
+      "webhookId": "5ec658b4-5be4-40f0-9247-ea45a9b6a8e9"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "concatenate",
+              "field": "produto"
+            },
+            {
+              "aggregation": "append",
+              "field": "Detalhes de investimentos"
+            }
+          ]
+        },
+        "fieldsToSplitBy": "email, nome, saldo, perfil",
+        "options": {
+          "outputFormat": "separateItems",
+          "skipEmptySplitFields": false
+        }
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        512,
+        -368
+      ],
+      "id": "c45ec7f7-c283-4df6-b462-4d86fae036a3",
+      "name": "Agrupa investimentos por cliente"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "perfil",
+        "options": {
+          "multipleMatches": "all"
+        }
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        320,
+        -368
+      ],
+      "id": "9f76ef87-d6f2-456a-8bd4-1a542b30653c",
+      "name": "Combina Clientes com Investimentos"
+    },
+    {
+      "parameters": {
+        "url": "https://taisanti.github.io/dio-lab-assistente-investimentos-rpa-n8n/data.csv",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "Perfil de Investidor"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -272,
+        -128
+      ],
+      "id": "38c71bca-e920-462c-9039-0e95e8a6abca",
+      "name": "Investimentos por perfil"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body.clientes",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        -384
+      ],
+      "id": "7a646c85-6c25-4114-b1f5-2aad0137b012",
+      "name": "Organiza clientes em itens separados"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "Perfil de Investidor",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -48,
+        -128
+      ],
+      "id": "dc4503f1-93a0-4189-84df-02cae15f165a",
+      "name": "Organiza investimento em itens separados"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.perfil }}",
+                    "rightValue": "Conservador",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "ae86a9cc-96f0-4cf9-a18e-2bfcd512be6a"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Conservador"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d3d6140b-ba4d-4a54-850c-95b3519ce28a",
+                    "leftValue": "={{ $json.perfil }}",
+                    "rightValue": "Moderado",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Moderado"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "121bdba0-3982-4488-95ff-a958d5176864",
+                    "leftValue": "={{ $json.perfil }}",
+                    "rightValue": "Arrojado",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Arrojado"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        -384
+      ],
+      "id": "0fdf5e52-d656-466d-8c7a-e9b466ac674b",
+      "name": "Filtra o tom da mensagem pelo perfil do cliente"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "63b5bb34-20c0-4e97-86aa-9aff07960655",
+              "name": "=mensagem",
+              "value": "=Olá, {{ $json.nome }}<br><br>  Segue o seu relatório de investimentos para perfil <b>{{ $json.perfil }}</b>.<br><br> Você atualmente tem um saldo de <b>{{ $json.saldo }}</b>.<br> Para manter a sua segurança financeira e estabilidade com foco em renda fixa, os produtos mais recomendados para você são:<br> <b>{{ $json.concatenated_produto }}</b><br> <br><br> Confira os detalhes de cada uma a seguir: {{ $json.appended_Detalhes_de_investimentos.join('') }}",
+              "type": "string"
+            },
+            {
+              "id": "9866be9a-e2fc-45e7-bac9-02e6f836b120",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "5d0c2be6-84dc-43d3-9cc2-6e65af843330",
+              "name": "assunto",
+              "value": "={{ $json.nome }}, confira suas recomendações para investir!",
+              "type": "string"
+            },
+            {
+              "id": "d96d9dc2-e1f9-4cf5-a550-504418d7f5dc",
+              "name": "nome",
+              "value": "={{ $json.nome }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1120,
+        -432
+      ],
+      "id": "3275d77c-4b1d-4ba8-b400-ce4d457a0807",
+      "name": "Mensagem: Conservador"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f5d036b8-f6c9-45fc-a0cb-5142bcff914b",
+              "name": "mensagem",
+              "value": "=Olá, {{ $json.nome }}<br><br>\n\nSegue o seu relatório de investimentos para perfil <b>{{ $json.perfil }}</b>.<br><br>\nVocê atualmente tem um saldo de <b>{{ $json.saldo }}</b>.<br>\nPara equilibrar a segurança com oportunidades de maior crescimento através de um mix diversificado, os produtos mais recomendados para você são:<br>\n<b>{{ $json.concatenated_produto }}</b><br>\n<br><br>\nConfira os detalhes de cada uma a seguir:\n{{ $json.appended_Detalhes_de_investimentos.join('') }}",
+              "type": "string"
+            },
+            {
+              "id": "f1b2288a-feba-4180-b149-3873cd93acf3",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "7729d878-5dde-46bd-a431-3db7f913f7da",
+              "name": "assunto",
+              "value": "={{ $json.nome }}, confira suas recomendações para investir!",
+              "type": "string"
+            },
+            {
+              "id": "b28d7296-f093-4dcc-938b-1b0532879e7f",
+              "name": "nome",
+              "value": "={{ $json.nome }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1120,
+        -304
+      ],
+      "id": "02d10a7c-2bc6-4c09-b3ab-a4e94e0380c3",
+      "name": "Mensagem: Moderado"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3d9a7c21-8f86-492c-8ac7-ee7a9e9a2729",
+              "name": "mensagem",
+              "value": "=Olá, {{ $json.nome }}<br><br>  Segue o seu relatório de investimentos para perfil <b>{{ $json.perfil }}</b>.<br><br> Você atualmente tem um saldo de <b>{{ $json.saldo }}</b>.<br> Com foco em maximizar a sua rentabilidade e buscar um maior potencial de retorno através de ações e ativos dinâmicos, os produtos mais recomendados para você são:<br> <b>{{ $json.concatenated_produto }}</b><br> <br><br> Confira os detalhes de cada uma a seguir: {{ $json.appended_Detalhes_de_investimentos.join('') }}",
+              "type": "string"
+            },
+            {
+              "id": "4bba1f86-0586-49e4-bff9-dcff3cc4bea8",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "d8932949-e91b-4b92-819a-dab22395ea99",
+              "name": "assunto",
+              "value": "={{ $json.nome }}, confira suas recomendações para investir!",
+              "type": "string"
+            },
+            {
+              "id": "ec83b70b-ba31-483d-a63f-56353c3d7488",
+              "name": "nome",
+              "value": "={{ $json.nome }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1120,
+        -176
+      ],
+      "id": "eaa27c3e-2fbc-4bb4-a55b-6179a2f66cb5",
+      "name": "Mensagem: Arrojado"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9d038e66-263f-4727-a72e-6b83527d4c91",
+              "name": "Detalhes de investimentos",
+              "value": "=<br><br>\nInvestimento: <b>{{ $json.produto }}</b><br>\nmínimo R$ {{ $json.minimo }}<br>\nrentabilidade {{ $json.rentabilidade }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        144,
+        -128
+      ],
+      "id": "dde2cab1-3ab7-4adf-af2d-b002300aea8a",
+      "name": "Agrupa detalhes de investimentos"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a521975d-da94-459d-8538-1d8c088400c2",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1856,
+        -272
+      ],
+      "id": "0ee3f503-aafe-4fa4-9a62-0585959bbb2e",
+      "name": "O e-mail é válido?"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.assunto }}",
+        "message": "={{ $json.appended_mensagem[0] }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2160,
+        -448
+      ],
+      "id": "baf84482-3112-4f86-9147-eada52952148",
+      "name": "Envia e-mail para o cliente",
+      "webhookId": "0cec8323-3835-424c-8211-83d692a2bf54",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FipRxPug7oRpVrAj",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2432,
+        -112
+      ],
+      "id": "2d2b3d5e-9951-4981-90dd-0dfe15625d39",
+      "name": "Aguarda antes da próxima mensagem",
+      "webhookId": "0d056865-0b42-4df6-b760-d203d463a3c5"
+    },
+    {
+      "parameters": {
+        "content": "Entrada de Clientes",
+        "height": 224,
+        "width": 320,
+        "color": "#66E7F4"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -432,
+        -432
+      ],
+      "typeVersion": 1,
+      "id": "53dc3f2b-50ff-4738-bd32-171c5aa78a04",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Investimentos por perfil de investidores",
+        "height": 208,
+        "width": 608,
+        "color": "#EC4A7B"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -320,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "d72a5d8c-19c3-4674-8616-9765f7aef112",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Tratamento e fusão de dados",
+        "height": 208,
+        "width": 416,
+        "color": "#9864EE"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        256,
+        -416
+      ],
+      "typeVersion": 1,
+      "id": "c165adba-3748-4e30-a8a5-4230892e67c3",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Protocolo de falha de envio por e-mail",
+        "height": 208,
+        "width": 192,
+        "color": "#B82130"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2112,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "097de664-3d27-4682-a788-65627a4ee024",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1FAQgEd4mbO29-UdmQHfhf8KszXJ9s-CGBF2O8kVeZGw",
+          "mode": "list",
+          "cachedResultName": "Assistente RPA - Log de Erros",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FAQgEd4mbO29-UdmQHfhf8KszXJ9s-CGBF2O8kVeZGw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FAQgEd4mbO29-UdmQHfhf8KszXJ9s-CGBF2O8kVeZGw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "E-mail": "={{ $json.email }}",
+            "Nome": "={{ $json.nome }}",
+            "Data": "={{ $now.toFormat('dd/MM/yyyy') }}",
+            "Hora": "={{ $now.toFormat('HH:mm:ss') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "E-mail",
+              "displayName": "E-mail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Hora",
+              "displayName": "Hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2160,
+        -160
+      ],
+      "id": "44d015cc-6d2f-4195-a3f2-182f9ebe77cb",
+      "name": "Log de e-mails que falharam",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MHz5bnXIwcQhWxEa",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Filtra comunicação por perfil de investimento",
+        "height": 528,
+        "width": 432,
+        "color": "#73BF8D"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        848,
+        -544
+      ],
+      "typeVersion": 1,
+      "id": "47158dab-adac-4cf9-acff-287519374397",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "Envia e-mail para os clientes",
+        "height": 240,
+        "width": 192,
+        "color": "#47B537"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2112,
+        -496
+      ],
+      "typeVersion": 1,
+      "id": "83ae7369-539a-4d8d-8c48-d80ef743af7f",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "Organiza dados e verifica validades dos e-mails",
+        "height": 224,
+        "width": 576,
+        "color": "#66E7F4"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1408,
+        -336
+      ],
+      "typeVersion": 1,
+      "id": "0ec5c58a-08b8-41e3-b17e-07e04f26d198",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1728,
+        -96
+      ],
+      "id": "dc0c7e19-fff2-4d27-b8dc-42789cfca3d0",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "append",
+              "field": "mensagem"
+            }
+          ]
+        },
+        "fieldsToSplitBy": "email, assunto, nome",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        1568,
+        -272
+      ],
+      "id": "75d432ae-95c9-42b4-9a1a-120802a4a10c",
+      "name": "Summarize"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1424,
+        -288
+      ],
+      "id": "de092d24-d174-41ef-af5b-9f289368139f",
+      "name": "Merge"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Lista de clientes": {
+      "main": [
+        [
+          {
+            "node": "Organiza clientes em itens separados",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Investimentos por perfil",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agrupa investimentos por cliente": {
+      "main": [
+        [
+          {
+            "node": "Filtra o tom da mensagem pelo perfil do cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combina Clientes com Investimentos": {
+      "main": [
+        [
+          {
+            "node": "Agrupa investimentos por cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Investimentos por perfil": {
+      "main": [
+        [
+          {
+            "node": "Organiza investimento em itens separados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Organiza clientes em itens separados": {
+      "main": [
+        [
+          {
+            "node": "Combina Clientes com Investimentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Organiza investimento em itens separados": {
+      "main": [
+        [
+          {
+            "node": "Agrupa detalhes de investimentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtra o tom da mensagem pelo perfil do cliente": {
+      "main": [
+        [
+          {
+            "node": "Mensagem: Conservador",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensagem: Moderado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensagem: Arrojado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agrupa detalhes de investimentos": {
+      "main": [
+        [
+          {
+            "node": "Combina Clientes com Investimentos",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "Mensagem: Moderado": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Mensagem: Conservador": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem: Arrojado": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "O e-mail é válido?": {
+      "main": [
+        [
+          {
+            "node": "Envia e-mail para o cliente",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log de e-mails que falharam",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envia e-mail para o cliente": {
+      "main": [
+        [
+          {
+            "node": "Aguarda antes da próxima mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguarda antes da próxima mensagem": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log de e-mails que falharam": {
+      "main": [
+        [
+          {
+            "node": "Aguarda antes da próxima mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "O e-mail é válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4a60e90f-7945-44af-b324-c8a0d493ece6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8fd06780b670fccc980433d2ee17847f92d3a651948efa1c58e74492f470d9d8"
+  },
+  "nodeGroups": [],
+  "id": "8g4NNaOCnbiTe5BC",
+  "tags": []
+}
