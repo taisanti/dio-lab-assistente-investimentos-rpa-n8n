@@ -102,31 +102,6 @@ E-mails com erro de digitação não são enviados: o nome, o e-mail digitado, a
 
 ![Planilha com o log de e-mails inválidos](imagens/log-de-erros.png)
 
-## ▶️ Como reproduzir
-
-1. Faça um **fork** deste repositório e ative o **GitHub Pages** (Settings → Pages → branch `main`, pasta `/docs`).
-2. No notebook `src/extrair_clientes.ipynb`, ajuste o `URL_PAGINA` para a URL do **seu** GitHub Pages.
-3. Suba o n8n localmente (Docker) e abra um túnel com `ngrok http 5678`.
-4. No n8n, importe o arquivo `n8n/workflow.json`.
-5. Configure as suas credenciais do **Gmail** e do **Google Sheets**, e crie uma planilha com as colunas `Nome`, `E-mail`, `Data` e `Hora`.
-6. No nó Webhook, clique em **Listen for test event**. No notebook, coloque a URL do ngrok (com o caminho do Webhook) em `N8N_WEBHOOK` e execute.
-
-> Ao testar, use **e-mails seus** nos dados de exemplo. Alguns endereços fictícios usam domínios que existem de verdade, e o envio chegaria a desconhecidos.
-
-## 📁 Estrutura do repositório
-
-```
-├── README.md
-├── docs/
-│   ├── index.html                 # página de clientes
-│   └── data.csv                   # opções de investimento por perfil
-├── src/
-│   └── extrair_clientes.ipynb     # script de RPA (Python)
-├── n8n/
-│   └── workflow.json              # workflow exportado do n8n
-└── imagens/                       # imagens usadas neste README
-```
-
 ## 💭 Conclusão
 
 Comecei o bootcamp sem nenhum conhecimento prévio de n8n. Com o apoio das aulas e de IA, consegui concluir o desafio e montar a minha primeira automação com APIs configuradas. Minha única crítica é que a aula do desafio de conclusão é pouco esclarecedora e confusa.
